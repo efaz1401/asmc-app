@@ -59,6 +59,8 @@ GoRouter buildRouter(WidgetRef ref) {
         return loc == '/splash' ? null : '/splash';
       }
       if (auth.status == AuthStatus.unauthenticated) {
+        // Once auth has resolved, the splash screen has done its job.
+        if (loc == '/splash') return '/login';
         if (publicRoutes.contains(loc)) return null;
         return '/login';
       }

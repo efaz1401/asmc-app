@@ -51,13 +51,13 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> bootstrap() async {
-    final access = await _storage.readAccessToken();
-    final userJson = await _storage.readUserJson();
-    if (access == null || userJson == null) {
-      state = state.copyWith(status: AuthStatus.unauthenticated, clearUser: true);
-      return;
-    }
     try {
+      final access = await _storage.readAccessToken();
+      final userJson = await _storage.readUserJson();
+      if (access == null || userJson == null) {
+        state = state.copyWith(status: AuthStatus.unauthenticated, clearUser: true);
+        return;
+      }
       final user = AuthUser.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
       state = state.copyWith(status: AuthStatus.authenticated, user: user);
       // Refresh in background; ignore failures (interceptor handles them)
@@ -66,7 +66,10 @@ class AuthController extends Notifier<AuthState> {
         _storage.writeUserJson(jsonEncode(u.toJson()));
       }).catchError((_) {});
     } catch (_) {
-      await _storage.clearAuth();
+      // Storage / parse failures must not leave the UI stuck on splash.
+      try {
+        await _storage.clearAuth();
+      } catch (_) {}
       state = state.copyWith(status: AuthStatus.unauthenticated, clearUser: true);
     }
   }
