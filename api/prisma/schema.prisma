@@ -1,15 +1,16 @@
 // ASMC Workforce Management — Prisma schema
 //
-// Defaults to SQLite for easy local dev. To switch to Postgres in production,
-// change `provider = "sqlite"` to `provider = "postgresql"` and update
-// DATABASE_URL in your .env to your Postgres connection string.
+// PostgreSQL is the only supported provider. For local dev, run a Postgres
+// container with `docker compose up -d db` (see `docker-compose.yml`) and
+// point DATABASE_URL at it. In production set DATABASE_URL to the managed
+// Postgres connection string (Render attaches one automatically).
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

@@ -1,0 +1,25 @@
+# Local-dev Postgres for the ASMC API.
+# Use:  docker compose up -d db
+# Then: cd api && cp .env.example .env && npm install && npx prisma migrate dev && npm run seed && npm run dev
+
+services:
+  db:
+    image: postgres:16
+    container_name: asmc-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: asmc
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: asmc
+    ports:
+      - "5432:5432"
+    volumes:
+      - asmc-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asmc -d asmc"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  asmc-pgdata:

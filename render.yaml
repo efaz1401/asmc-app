@@ -1,0 +1,45 @@
+# https://render.com/docs/blueprint-spec
+# One-click deploy: New > Blueprint > pick this repo > Apply.
+# Provisions:
+#   - asmc-api : Node web service, builds api/Dockerfile, public HTTPS URL
+#   - asmc-db  : managed Postgres, attached via DATABASE_URL
+services:
+  - type: web
+    name: asmc-api
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: api
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: asmc-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      # CORS_ORIGIN is set to "*" by default for first-deploy validation.
+      # Tighten it to the real app/web origin once you know it.
+      - key: CORS_ORIGIN
+        value: "*"
+      # Set SEED_ON_BOOT=true ONCE on the first deploy to populate seed users.
+      # Switch back to false after the first successful boot.
+      - key: SEED_ON_BOOT
+        value: "true"
+
+databases:
+  - name: asmc-db
+    plan: free
+    region: oregon
+    databaseName: asmc
+    user: asmc
