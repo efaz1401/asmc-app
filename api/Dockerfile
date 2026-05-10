@@ -13,9 +13,6 @@ COPY src ./src
 RUN npx prisma generate
 RUN npm run build
 
-# Strip dev deps for the runtime image.
-RUN npm prune --omit=dev
-
 # --- Runtime stage ------------------------------------------------------------
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -36,4 +33,4 @@ EXPOSE 4000
 # On boot: run any pending migrations against $DATABASE_URL, then start the API.
 # The seed runs only when SEED_ON_BOOT=true so it's safe to leave on for the
 # first deploy and turn off afterwards.
-CMD ["sh", "-c", "npx prisma migrate deploy && (if [ \"$SEED_ON_BOOT\" = \"true\" ]; then node -e 'require(\"child_process\").execSync(\"npx tsx prisma/seed.ts\", {stdio: \"inherit\"})' || true; fi) && node dist/server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && (if [ \"$SEED_ON_BOOT\" = \"true\" ]; then npx tsx prisma/seed.ts || true; fi) && node dist/server.js"]
