@@ -6,7 +6,10 @@
 // Postgres connection string (Render attaches one automatically).
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Native target covers local dev; linux-musl-openssl-3.0.x is needed for
+  // node:20-alpine on Render (alpine 3.18+ ships OpenSSL 3.x).
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
